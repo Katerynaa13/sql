@@ -41,3 +41,22 @@ ORDER BY count_users DESC
 ----------------------------------------------------------------------
 | {1:Guest}             | 13          | {106,34}                     |
 ----------------------------------------------------------------------
+
+--Запит поверне список подарунків, надісланих за останні 3 дні, із зазначенням ресурсу, ідентифікаторів відправника та одержувачки, а також актуального облікового запису дівчинки.
+SELECT r.name AS RESOURCE ,
+       g.admin_internal_id AS admin_internal_id ,
+       g.user_internal_id AS user_internal_id ,
+       ua.internal_id user_internal_id_true
+FROM gifts g
+LEFT JOIN user_accounts ua ON ua.id = g.girl_account_id
+LEFT JOIN resources r ON r.id = ua.resource_id
+WHERE g.date_sent::date >= (now() - interval '3 day')::date
+  AND g.date_sent::date <= now()::date
+
+----------------------------------------------------------------------------
+| resource  | admin_internal_id | user_internal_id | user_internal_id_true |
+----------------------------------------------------------------------------
+| TechStore | 365               | 394655           | 39667434              |
+----------------------------------------------------------------------------
+| EcoMarket | 4513              | 8643689          |4324986                |
+----------------------------------------------------------------------------
