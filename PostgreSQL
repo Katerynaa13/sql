@@ -2,10 +2,17 @@
 --resource_id = 11 (фільтрує дані за конкретним ресурсом із ID 11).
 --user_id = '019551d5-edb2-7fc1-87f7-0150ac2d0430' (фільтрує дані за конкретним користувачем).
 --date >= CURRENT_DATE - INTERVAL '7 days' (враховує лише записи за останні 7 днів, починаючи від поточної дати).
-
 --Запит поверне одне значення у вигляді total_score — суму всіх score за вказаний період і умови.
 SELECT SUM(score) AS total_score
 FROM results
 WHERE resource_id = 11
   AND user_id = '019551d5-edb2-7fc1-87f7-0150ac2d0430'
   AND date >= CURRENT_DATE - INTERVAL '7 days'
+
+--Цей запит поверне всі записи з user_whitelist, пов’язані з user_accounts, які належать до resource 30, де admin_internal_id має довжину, відмінну від 26 символів, упорядковані за датою створення (від нових до старих).
+SELECT *
+FROM user_whitelist uw
+INNER JOIN user_accounts ua ON ua.id = uw.user_account_id
+WHERE ua.resource_id=30
+  AND char_length(admin_internal_id) != 26
+ORDER BY uw.creation_date DESC 
