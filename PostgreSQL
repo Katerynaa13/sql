@@ -16,3 +16,28 @@ INNER JOIN user_accounts ua ON ua.id = uw.user_account_id
 WHERE ua.resource_id=30
   AND char_length(admin_internal_id) != 26
 ORDER BY uw.creation_date DESC 
+
+--Повертає список унікальних комбінацій ролей користувачів, кількість користувачів з кожною такою комбінацією та список їх user_id, але з обмеженням на відображення, якщо користувачів надто багато.
+SELECT role_combination,
+       COUNT(DISTINCT user_id) AS count_users,
+       CASE
+           WHEN COUNT(DISTINCT user_id) > 50 THEN ARRAY ['Too much ids for display']
+           ELSE ARRAY_AGG(DISTINCT user_id::text)
+       END AS user_ids
+FROM
+  (SELECT ur.user_id,
+          ARRAY_AGG(r.id || ':' || r.name
+                    ORDER BY r.name) AS role_combination
+   FROM user_roles ur
+   JOIN ROLES r ON ur.role_id = r.id
+   GROUP BY ur.user_id) subquery
+GROUP BY role_combination
+ORDER BY count_users DESC
+
+----------------------------------------------------------------------
+| role_combination      | count_users | user_ids                     |
+----------------------------------------------------------------------
+| {2:Admin,1:Team Lead} | 365         | {"Too much ids for display"} |
+----------------------------------------------------------------------
+| {2:Guest}             | 13          | {106,34}                     |
+----------------------------------------------------------------------
